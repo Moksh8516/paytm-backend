@@ -11,6 +11,7 @@ app.use(express.urlencoded({
 }))
 
 import mainRouter from "./routes/index.routes"
-app.use("/api/v1", mainRouter);
+// import authRouter from "./routes/auth.routes"
+app.use("/api/v1",mainRouter );
 
 export {app};
