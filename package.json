@@ -16,7 +16,9 @@
     "@types/bcryptjs": "^3.0.0",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
-    "@types/jsonwebtoken": "^9.0.9"
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^22.13.13",
+    "prettier": "^3.5.3"
   },
   "scripts": {
     "build": "npx tsc -b",

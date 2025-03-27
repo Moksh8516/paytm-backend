@@ -1,7 +1,7 @@
 import { Response, Request } from "express";
 import {z} from "zod";
 import bcrypt from "bcryptjs"
-import { User } from "../models/auth.model";
+import { Account, User } from "../models/auth.model";
 import jwt from "jsonwebtoken";
 import { asyncHandler } from "../utils/asyncHandler";
 import dotenv from "dotenv";
@@ -27,7 +27,8 @@ const generateToken = (user:any)=>{
 export const signup = asyncHandler(async (req, res) => {
   const result = userSchema.safeParse(req.body);
   if (!result.success) {
-    return res.status(400).json({ message: "invalid data" });
+    res.status(400).json({ message: "invalid data" });
+    return 
   }
   const { userName, email, password, firstName, lastName } = result.data;
   const existingUser  = await User.findOne({
@@ -37,7 +38,8 @@ export const signup = asyncHandler(async (req, res) => {
     ]
   });
   if (existingUser ) {
-    return res.status(409).json({ message: "user already exists" });
+    res.status(409).json({ message: "user already exists" });
+    return 
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -50,10 +52,11 @@ export const signup = asyncHandler(async (req, res) => {
     password: hashedPassword
   });
   if (!user) {
-    return res.status(500).json({ message: "failed to create user" });
+    res.status(500).json({ message: "failed to create user" });
+    return
   }
 
-  return res.status(201).json({
+  res.status(201).json({
     message: "user created successfully",
     user
   });
@@ -68,12 +71,14 @@ const signInSchema=z.object({
 export async function signin(req:Request, res:Response){
   const result = signInSchema.safeParse(req.body);
   if(!result.success){
-   return res.status(411).json({message:"Input required"});
+    res.status(411).json({message:"Input required"});
+   return 
   }
   const {email,userName,password}= result.data;
 
   if(!(email ||userName)){
-    return res.status(411).json({message:"Email and username are required"})
+    res.status(411).json({message:"Email and username are required"})
+    return
   }
   const user = await User.findOne({
     $or: [
@@ -81,19 +86,26 @@ export async function signin(req:Request, res:Response){
     ]});
 
     if(!user){
-      return res.status(401).json({message:"invalid email or username"})
+      res.status(401).json({message:"invalid email or username"})
+      return
     }
 
     //@ts-ignore
     const isValidPassword = await bcrypt.compare(password,user.password);
 
     if(!isValidPassword){
-      return res.status(401).json({message:"invalid password"})
+      res.status(401).json({message:"invalid password"})
+      return 
     }
 
     let token = generateToken(user);
+    await Account.create({
+      userId:user._id,
+      balance: 1+Math.random()*10000
+    })
+
     let userloggedIn = await User.findById(user._id).select("-password")
-    return res.status(200).json({
+    res.status(200).json({
       message:"signed in successfully",
       token,
       user:userloggedIn
@@ -117,10 +129,11 @@ export const bulkdata = asyncHandler(async(req, res)=>{
     ]
   })
   if(!data){
-    return res.status(404).json({message:"No data found"})
+    res.status(404).json({message:"No data found"})
+    return;
   }
   
-  return res.status(200).json({
+   res.status(200).json({
     user:data.map((user)=>({
       userName:user.userName,
       email:user.email,

@@ -2,7 +2,9 @@ import { Router } from "express"
 const router:Router = Router()
 
 import authRoutes from "./auth.routes"
+import transactionRoutes from "./Transaction.routes"
 router.use("/user",authRoutes)
+router.use("/account",transactionRoutes)
 
 export default router;
 
