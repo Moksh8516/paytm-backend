@@ -113,7 +113,7 @@ export async function signin(req:Request, res:Response){
 }
 
 export const bulkdata = asyncHandler(async(req, res)=>{
-  const {filter} = req.query;
+  const filter = req.query.filter || "";
   const data = await User.find({
     $or: [
       {
