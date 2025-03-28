@@ -63,7 +63,6 @@ export const signup = asyncHandler(async (req, res) => {
 });
 
 const signInSchema=z.object({
-  email:z.string().email().optional(),
   userName:z.string().optional(),
   password:z.string().min(8),
 })
@@ -74,15 +73,15 @@ export async function signin(req:Request, res:Response){
     res.status(411).json({message:"Input required"});
    return 
   }
-  const {email,userName,password}= result.data;
-
-  if(!(email ||userName)){
+  const {userName,password}= result.data;
+  
+  if(!userName){
     res.status(411).json({message:"Email and username are required"})
     return
   }
   const user = await User.findOne({
     $or: [
-      {email},{userName}
+      {email:userName},{userName}
     ]});
 
     if(!user){
@@ -142,4 +141,13 @@ export const bulkdata = asyncHandler(async(req, res)=>{
     })
   )
   })
+})
+
+export const getUser = asyncHandler(async(req,res)=>{
+  const response = await User.findById(req.userId).select("-password")
+  if(!response){
+    res.status(404).json({message:"User not found"})
+    return;
+  }
+  res.status(200).json({message:"user found", response })
 })

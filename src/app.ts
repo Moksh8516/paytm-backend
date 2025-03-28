@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors"
 const app = express();
 
 app.use(express.json({
@@ -10,6 +11,7 @@ app.use(express.urlencoded({
   limit:"50kb"
 }))
 
+app.use(cors());
 import mainRouter from "./routes/index.routes"
 // import authRouter from "./routes/auth.routes"
 app.use("/api/v1",mainRouter );
