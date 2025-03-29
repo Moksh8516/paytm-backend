@@ -6,7 +6,7 @@ const router:Router = Router();
 
 router.route('/signup').post(signup);
 router.route('/login').post(asyncHandler(signin));
-router.route('/bulk').get(bulkdata);
+router.route('/bulk').get(verifyJWT, bulkdata);
 router.route('/get-user').get(verifyJWT, getUser);
 
 export default router;

@@ -5,13 +5,14 @@ import { Account, User } from "../models/auth.model";
 import jwt from "jsonwebtoken";
 import { asyncHandler } from "../utils/asyncHandler";
 import dotenv from "dotenv";
+import { error } from "console";
 dotenv.config()
 
 const userSchema = z.object({
-  userName: z.string(),
+  userName: z.string().min(3),
   email: z.string().email({message:"provide valid email"}),
   password: z.string().min(8,{message:"min length is 8"}),
-  firstName: z.string(),
+  firstName: z.string().min(3),
   lastName: z.string(),
 })
 
@@ -27,8 +28,12 @@ const generateToken = (user:any)=>{
 export const signup = asyncHandler(async (req, res) => {
   const result = userSchema.safeParse(req.body);
   if (!result.success) {
-    res.status(400).json({ message: "invalid data" });
-    return 
+    const errors = result.error.issues.map((issue)=>({
+      field: issue.path[0],
+      message: issue.message,
+    }))
+    res.status(411).json({ message: "invalid Inputs", errors });
+    return;
   }
   const { userName, email, password, firstName, lastName } = result.data;
   const existingUser  = await User.findOne({
@@ -63,14 +68,18 @@ export const signup = asyncHandler(async (req, res) => {
 });
 
 const signInSchema=z.object({
-  userName:z.string().optional(),
+  userName:z.string({message:"field is required"}).min(3).optional(),
   password:z.string().min(8),
 })
 
 export async function signin(req:Request, res:Response){
   const result = signInSchema.safeParse(req.body);
   if(!result.success){
-    res.status(411).json({message:"Input required"});
+    const errors = result.error.issues.map((issue)=>({
+      field: issue.path[0],
+      message: issue.message,
+    }))
+    res.status(411).json({message:"Input required", errors});
    return 
   }
   const {userName,password}= result.data;
@@ -125,7 +134,8 @@ export const bulkdata = asyncHandler(async(req, res)=>{
           $regex:filter,
         }
       }
-    ]
+    ],
+    _id:{$ne : req.userId},
   })
   if(!data){
     res.status(404).json({message:"No data found"})
@@ -134,6 +144,7 @@ export const bulkdata = asyncHandler(async(req, res)=>{
   
    res.status(200).json({
     user:data.map((user)=>({
+      id:user._id,
       userName:user.userName,
       email:user.email,
       firstName:user.firstName,
