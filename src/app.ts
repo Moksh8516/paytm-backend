@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Response,Request } from "express";
 import cors from "cors"
 const app = express();
 
@@ -11,9 +11,14 @@ app.use(express.urlencoded({
   limit:"50kb"
 }))
 
+
+
 app.use(cors());
 import mainRouter from "./routes/index.routes"
 // import authRouter from "./routes/auth.routes"
 app.use("/api/v1",mainRouter );
+app.get("/",async(req:Request,res:Response)=>{
+  res.send("Hello World");
+})
 
 export {app};
