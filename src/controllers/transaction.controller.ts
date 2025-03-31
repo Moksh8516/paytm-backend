@@ -2,20 +2,21 @@ import mongoose, { ObjectId } from "mongoose";
 import { Account } from "../models/auth.model";
 import { asyncHandler } from "../utils/asyncHandler";
 
+
 export const balance = asyncHandler(async(req,res)=>{
   let account = await Account.findOne({
     userId : req.userId,
-  })
+  }).populate("userId","userName");
 
   if(!account){
     res.status(404).json({
       message:"account doesnot exist"
     })
-    return 
+    return; 
   }
-
    res.status(200).json({
     currentBalance:account?.balance,
+    userName: (account?.userId as any).userName,
     message:"fetch balance"
   })
 })
